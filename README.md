@@ -6,5 +6,6 @@ There’s probably a lot that could be different in here, so feel free to dive i
 ---
 
 ### 🐞 New Issue or 💬 Comments?
-- [Open an Issue](https://github.com/SENTINELITE/StreamDeck-Shortcuts/issues/new) - [Tweet 
-Me](http://sentinelite.com/twitter) - [Join the Discord Community](https://sentinelite.com/discord)
+- [Open an Issue](https://github.com/SENTINELITE/StreamDeck-Shortcuts/issues/new) 
+- [Tweet Me](http://sentinelite.com/twitter) 
+- [Join the Discord Community](https://sentinelite.com/discord)
