@@ -1,26 +1,24 @@
 
 //Someone with more knowledge of JS would be able to make this better. 😉
+//Shoutout to GitHub CoPilot fo the assitance!
 
 
 let websocket = null,
 	uuid = null,
 	actionInfo = {};
 
-//listOfCuts = ['Test With Spaces', 'Restart_StreamDeck', 'Set Elgato Light With Put', 'Save Text Files', 'Open Craft Recording Notes', 'ElgatoTest', 'Move Window', 'Open Space', 'Prepare Web Assets', 'Open URLs', 'Open Apple', 'Open Twitch SE', 'New Shortcut 2', 'JS Common Sort', 'New Shortcut 1', 'New Shortcut', 'Directions Home', 'TestAlert', 'Test Alert', 'TestCut_New', 'TestCut_New1', 'TestCut_Name', 'TestAlertDebug', 'Open Apps Bundle', 'ToggleNanoleafBulb']
-
 listOfCuts = ['Placeholder', '2'];
 shortcutsFolder = ['PlaceholderFolder'];
 mappedDataFromBackend = { 'placeHolder': 'PlaceHolder2' };
 
-// let listOfCuts = ["TestAlert", "Restart_StreamDeck", "TestCut_New"]
 listOfVoices = ['PlaceholderVoice', 'test']
 
 isSayvoice = false;
 isForcedTitle = true;
 globalSayVoice = "";
 
-usersSelectedShortcut = "";-
-loadedPI = false;
+usersSelectedShortcut = "";
+var loadedPI = false;
 
 refType = "nil"
 
@@ -62,7 +60,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 			shortcut_list = document.getElementById('shortcut_list');
 
-			sayvoice  = payload.sayvoice;
+			sayvoice = payload.sayvoice;
 			globalSayVoice = sayvoice;
 
 			// listOfCuts = payload.shortcuts; //Get Array From SWift, Update ListOfCuts, then make the Dropdown list 
@@ -94,7 +92,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			const el = document.querySelector('.sdpi-wrapper');
 
 
-			filterMapped('all'); //Two way binding would be nice here...
+			filterMapped('All'); //Two way binding would be nice here...
 			refreshListOfShortcutsFolders();
 			refreshListOfShortcuts();
 			refreshListOfVoices(sayvoice);
@@ -118,15 +116,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 		console.log('THE EVENTS!, ', evt);
 	};
-
-}
-
-function findFolder(shortcut) {
-
-	if (listOfCuts.includes(shortcut)) {
-		console.log('Found Shortcut!')
-		//Change Folder/Shortcut group!
-	}
 
 }
 
@@ -167,6 +156,9 @@ function updateSettings() {
 		console.log("Type: ", typeof sayvoice_holdtime);
 
 		const sayvoice = document.getElementById('sayvoice');
+		if (sayvoice.value === "undefined") {
+			payload.sayvoice = "Samantha";
+		}
 		payload.sayvoice = sayvoice.value;
 
 		payload.isSayvoice = isSayvoice.toString();
@@ -193,10 +185,25 @@ function updateSettings() {
 	}
 }
 
+function findFolder(shortcut) {
+
+	if (listOfCuts.includes(shortcut)) {
+		console.log('Found Shortcut!')
+		//Change Folder/Shortcut group!
+	}
+
+}
+
+
+// ❄️ --------------------------------------------------------------------------------------------------------------|
+//  | Split Break																								|
+//  ----------------------------------------------------------------------------------------------------------------|
+
+
 // function changedShortcutInput() {
 
 // 	const shortcutName = document.getElementById('shortcutName');//Shortcut Name
-	
+
 // 	const shortcutList = document.getElementById('shortcut_list');//shortcut_list's user-facing text. We want to change this to the value of the TextField, if it's valid.
 
 
@@ -218,15 +225,22 @@ function updateSettings() {
 // }
 
 
+//We filter all of the shortcuts, based off of the selected folder input.
 function filterMapped(filteredByFolder) {
-	console.log("🚨filterMapped Starting");
+	console.log("🚨filterMapped Starting, with folder", filteredByFolder);
 
 	listOfCuts.length = 0; //Reset the listOfCuts everytime we refilter.
 
-	if (filteredByFolder == 'all') {
+	var sh_count = 0;
+
+	if (filteredByFolder == 'All') {
 		for (var key in mappedDataFromBackend) {
+			sh_count++;
+			console.log("🚨filterMapped: All,  | Ket: ", key.key, " | Value: ", key.value);
 			listOfCuts.push(key);
 		}
+		console.log("🚨filterMapped: All, Total sh_count: ", sh_count);
+		console.log("🚨filterMapped: All, Total shortcut Length: ", listOfCuts.length);
 	}
 	else {
 		for (var key in mappedDataFromBackend) {
@@ -236,6 +250,9 @@ function filterMapped(filteredByFolder) {
 			}
 		}
 	}
+
+	select = document.getElementById("shortcuts_folder_list");
+	select.value = filteredByFolder;
 	listOfCuts.sort(); //Reorganize shortcuts list, based on alphabetical order/
 	console.log("🚨filterMapped Stopping");
 	refreshListOfShortcuts();
@@ -248,17 +265,12 @@ function refreshListOfShortcuts() {
 	listOfShortcuts = document.getElementById("shortcut_list");
 	listOfFolders = document.getElementById("shortcuts_folder_list");
 
+	console.log("   🦑 Before Name: ", listOfShortcuts.value);
 	if (listOfShortcuts.length != listOfCuts.length) {
 		listOfShortcuts.length = 0;
 
 		for (var val of listOfCuts) {
-			val = val.replace(/"/g, "'")
-			// console.log("The Bvalue: ", val)
-
-			var option = document.createElement("option");
-
-			option.value = val;
-			option.text = val.charAt(0).toUpperCase() + val.slice(1);
+			option = genOption(val);
 			listOfShortcuts.appendChild(option);
 		}
 		// select.value = shortcutName;
@@ -268,35 +280,55 @@ function refreshListOfShortcuts() {
 		// console.log('🦑 xo', listOfCuts[0], 'z: ', z);
 		// console.log('🦑 xo Value', listOfCuts[0].value);
 		// console.log('🦑 ran the mainLoop', listOfShortcuts.value);
-		
+
 	}
+	updateSettings();
 	//Check if folderList contains dropdown Shortuct
 	//If it does, then change the text & refresh the dropdown.
+	if (loadedPI === false) {
+		console.log("   🦑 Mid Name: ", listOfShortcuts.value);
 		if (listOfCuts.includes(usersSelectedShortcut)) {
 
+			console.log("   🦑 1/7 Name: ", listOfShortcuts.value);
 			//Set the dropdown's initial value to the user's saved Shortcut.
 			listOfShortcuts.value = usersSelectedShortcut;
+			console.log("   🦑 2/7 Name: ", listOfShortcuts.value);
 
 			//filters through all keys, searching for the folder of said Shortcut.
 			for (const key of Object.keys(mappedDataFromBackend)) {
-			  
+				console.log("   🦑 3/7 Name: ", listOfShortcuts.value);
+
 				//If the key matyches the Shortcut, then we've found it's folder!
 				if (key == usersSelectedShortcut) { // compares selected shortcut to the array of keys
+					console.log("   🦑 4/7 Name: ", listOfShortcuts.value);
+					console.log("   SNOWMAN EMEG: ", key, mappedDataFromBackend[key]);
 
 					//Set the folder's initial value to the folderName.
-				  listOfFolders.value = mappedDataFromBackend[key];
+					listOfFolders.value = mappedDataFromBackend[key];
+					console.log("   🦑 5/7 Name: ", listOfShortcuts.value, " | Folder: ", mappedDataFromBackend[key]);
 
-				  //Only run this code once, upon PI appearing.
-				  if (loadedPI === false) {
-					  loadedPI = true;
-					  filterMapped(mappedDataFromBackend[key]); //Filter dropdown list based on the folder of the user's last set Shortcut
-				  }
+					//Only run this code once, upon PI appearing.
+					console.log("   🦑 6/7 Name: ", listOfShortcuts.value);
+					loadedPI = true;
+					filterMapped(mappedDataFromBackend[key]); //Filter dropdown list based on the folder of the user's last set Shortcut
+					console.log("   🦑 8/7 Name: ", listOfShortcuts.value);
+					
+					//This allows us to avoid the folder getting stuck on "All". Not the best workaround, but it works. 😅
+					setTimeout(() => { 
+						select = document.getElementById("shortcuts_folder_list");
+						select.value = mappedDataFromBackend[key];
+						console.log("World!");
+					 }, 500);
+
+
 				}
+			}
 		}
 	}
-		else {
-			listOfShortcuts.value = listOfCuts[0];
-		}console.log("🚨refreshListOfShortcuts Stoping");
+	else {
+		listOfShortcuts.value = listOfCuts[0];
+	}
+	console.log("🚨refreshListOfShortcuts Stopping");
 }
 
 function refreshListOfShortcutsFolders() {
@@ -320,13 +352,7 @@ function refreshListOfShortcutsFolders() {
 		select.length = 0;
 
 		for (var val of shortcutsFolder) {
-			val = val.replace(/"/g, "'")
-			// console.log("The Bvalue: ", val)
-
-			var option = document.createElement("option");
-
-			option.value = val;
-			option.text = val.charAt(0).toUpperCase() + val.slice(1);
+			option = genOption(val);
 			select.appendChild(option);
 		}
 	}
@@ -345,13 +371,7 @@ function refreshListOfVoices(sayvoice) {
 		select.length = 0;
 
 		for (var val of listOfVoices) {
-			val = val.replace(/"/g, "'")
-			// console.log("The Bvalue: ", val)
-
-			var option = document.createElement("option");
-
-			option.value = val;
-			option.text = val.charAt(0).toUpperCase() + val.slice(1);
+			option = genOption(val);
 			select.appendChild(option);
 		}
 	}
@@ -398,22 +418,21 @@ function selectedNewIndex(selected_id, selected_type) {
 		// const shortcutName = document.getElementById('shortcutName');
 		// shortcutName.value = listOfCuts[selected_id];
 		//TODO: Send message about ref type 🟥
+		console.log("		🟥  🚨  🟥  🚨   🟥  🚨  SIGNAL!?");
 		refType = "dropdownRefs";
+		// updateSettings();
 
 	}
 	else if (selected_id === -1) {
 		select1 = document.getElementById("sayvoice");
 		select1.value = "Siri";
-console.log("The voice is off!");
+		console.log("The voice is off!");
 	}
 	else {
 		console.log("New X X Selected", selected_id);
 		//TODO: Send message about ref type 🟥
 	}
-}
-
-function submittedTheNewValue() {
-	console.log("👀 submittedTheNewValue");
+	updateSettings();
 }
 
 function openPage(site) {
@@ -453,6 +472,8 @@ function toggleAccessNew() {
 	}
 
 	//Change Access Bool & save settings!
+	updateSettings();
+	console.log("🔈 isSayvoice: Shouldb e updating voics ");
 
 }
 
@@ -496,42 +517,17 @@ function changeForcedTitle() {
 	}
 
 	console.log("Post", isForcedTitle)
+	updateSettings();
 }
 
 
 
-
-
-const getSizeInBytes = obj => {
-	let str = null;
-	if (typeof obj === 'string') {
-	  // If obj is a string, then use it
-	  str = obj;
-	} else {
-	  // Else, make obj into a string
-	  str = JSON.stringify(obj);
-	}
-	// Get the length of the Uint8Array
-	const bytes = new TextEncoder().encode(str).length;
-	return bytes;
-  };
-  
-  const logSizeInBytes = (description, obj) => {
-	const bytes = getSizeInBytes(obj);
-	console.log(`${description} is approximately ${bytes} B`);
-  };
-  
-  const logSizeInKilobytes = (description, obj) => {
-	const bytes = getSizeInBytes(obj);
-	const kb = (bytes / 1000).toFixed(2);
-	console.log(`${description} is approximately ${kb} kB`);
-  };
 /* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 // function myFunction() {
 // 	document.getElementById("myDropdown").classList.toggle("show");
 //   }
-  
+
 //   function filterFunction() {
 // 	var input, filter, ul, li, a, i;
 // 	input = document.getElementById("myInput");
@@ -549,7 +545,7 @@ toggle between hiding and showing the dropdown content */
 //   }
 
 //Toggle the custom search list view.
-function toggleMenu () {
+function toggleMenu() {
 	searchMenu = document.getElementById("searchMenu")
 	searchBar = document.getElementById("searchBar")
 
@@ -595,16 +591,39 @@ function fillSearchBarList() {
 }
 
 //Fill the customList full of the animals array.
-function fillCustomList(){
+function fillCustomList() {
 	list = document.getElementById("myDropdown")
 	// list.length = 0;
 
 	for (var val of listOfCuts) {
 		option = genOption(val)
 		option.onclick = function () { testPrint(this.value) };
-		list.appendChild(option);
+		try {
+			list.appendChild(option);
+		} catch (e) {
+			//WARING: This is suppressing the errors, I believe. For whatever reason, this. is allowing the list to be filled...
+			// list.appendChild(option);
+		}
 	}
 }
+// function fillSearchBarList() {
+//     list = document.getElementById("search_list_id") //Fetch the list
+//     list.innerHTML = ''; //Clear the list
+
+//     //Refill the list with the new options
+//     for (var val of listOfCuts) {
+//         option = genOption(val)
+//         option.onclick = function () { testPrint(this.value) };
+//         list.appendChild(option);
+//     }
+// }
+
+
+
+// ❄️ --------------------------------------------------------------------------------------------------------------|
+//  | Helper Functions																								|
+//  ----------------------------------------------------------------------------------------------------------------|
+
 
 //Helper function to generate an option element.
 function genOption(val) {
@@ -644,17 +663,41 @@ function testPrint(nameofElement) {
 	console.log("__Name_OF_ELEMETN:", nameofElement)
 	refType = "searchRefs"
 
+	updateSettings();
+
 	toggleMenu();
 }
 
-// function fillSearchBarList() {
-//     list = document.getElementById("search_list_id") //Fetch the list
-//     list.innerHTML = ''; //Clear the list
 
-//     //Refill the list with the new options
-//     for (var val of listOfCuts) {
-//         option = genOption(val)
-//         option.onclick = function () { testPrint(this.value) };
-//         list.appendChild(option);
-//     }
-// }
+
+// ❄️ --------------------------------------------------------------------------------------------------------------|
+//  | Log payload in Kilobytes & Megabytes																								|
+//  ----------------------------------------------------------------------------------------------------------------|
+
+
+
+
+const getSizeInBytes = obj => {
+	let str = null;
+	if (typeof obj === 'string') {
+		// If obj is a string, then use it
+		str = obj;
+	} else {
+		// Else, make obj into a string
+		str = JSON.stringify(obj);
+	}
+	// Get the length of the Uint8Array
+	const bytes = new TextEncoder().encode(str).length;
+	return bytes;
+};
+
+const logSizeInBytes = (description, obj) => {
+	const bytes = getSizeInBytes(obj);
+	console.log(`${description} is approximately ${bytes} B`);
+};
+
+const logSizeInKilobytes = (description, obj) => {
+	const bytes = getSizeInBytes(obj);
+	const kb = (bytes / 1000).toFixed(2);
+	console.log(`${description} is approximately ${kb} kB`);
+}; z

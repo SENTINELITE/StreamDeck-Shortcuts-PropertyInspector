@@ -23,7 +23,7 @@
 	<div class="sdpi-item" id="isFolder">
 	  <label class="sdpi-item-label">📁 Folder</label>
 	  <select class="sdpi-item-value select" name="shortcuts_folder_list" id="shortcuts_folder_list"
-		onfocus="refreshListOfShortcutsFolders()" onselect="submittedTheNewValue()"
+		onfocus="refreshListOfShortcutsFolders()"
 		onchange="selectedNewIndex(this.selectedIndex, 'shortcutFolder');">
 		<option value="rigatoni">Placeholder Folder</option>
 	  </select>
@@ -72,14 +72,14 @@
 	  <div class="sdpi-item">
 		<label class="sdpi-item-label">🔊 Voice</label>
 		<select class="sdpi-item-value select" id="sayvoice" onfocus="refreshListOfVoices()"
-		  onselect="submittedTheNewValue()" onchange="selectedNewIndex(this.selectedIndex, 'sayvoice');">
+		  onchange="selectedNewIndex(this.selectedIndex, 'sayvoice');">
 		  <option value="rigatoni">Placeholder Folder</option>
 		</select>
 	  </div>
 
 	  <div class="sdpi-item">
 		<div class="sdpi-item-label">⌛ HoldTime</div>
-		<input class="sdpi-item-value" id="sayvoice_holdtime" value="" placeholder="Enter a floating number ie: 3.75."
+		<input class="sdpi-item-value" id="sayvoice_holdtime" value="" placeholder="Enter a floating number ie: 3.75." onchange="updateSettings()">
 		  required>
 	  </div>
 
