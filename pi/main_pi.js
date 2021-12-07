@@ -1,6 +1,6 @@
 
 //Someone with more knowledge of JS would be able to make this better. 😉
-//Shoutout to GitHub CoPilot fo the assitance!
+//Shoutout to GitHub CoPilot for the assitance!
 
 
 let websocket = null,
