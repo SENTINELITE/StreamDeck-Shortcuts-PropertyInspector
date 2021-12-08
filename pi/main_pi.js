@@ -15,7 +15,9 @@ listOfVoices = ['PlaceholderVoice', 'test']
 
 isSayvoice = false;
 isForcedTitle = true;
-globalSayVoice = "";
+var globalSayVoice = "Alex";
+
+var testGlobalVoice = "Siri assistant";
 
 usersSelectedShortcut = "";
 var loadedPI = false;
@@ -48,8 +50,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			console.log("Payload recieved, we've sent to the PI!!!!!");
 			const payload = jsonObj.payload;
 			if (payload.error) {
+				// printToConsole('Error: ' + payload.error);
 				return;
 			}
+
+			console.log("Payload: ", payload);
 
 			logSizeInBytes('payload recvd', payload);
 			logSizeInKilobytes('payload recvd', payload);
@@ -60,8 +65,13 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 			shortcut_list = document.getElementById('shortcut_list');
 
+			testGlobalVoice = payload.sayvoice;
+			
 			sayvoice = payload.sayvoice;
 			globalSayVoice = sayvoice;
+
+			// console.log('sayVoice Start: ', typeof sayvoice);
+			console.log('sayVoice Start: ', sayvoice); //Name of Voice
 
 			// listOfCuts = payload.shortcuts; //Get Array From SWift, Update ListOfCuts, then make the Dropdown list 
 			// listOfCuts = JSON.parse(listOfCuts);
@@ -153,13 +163,30 @@ function updateSettings() {
 		if (sayvoice_holdtime.value == "") {
 			payload.sayHoldTime = "0";
 		}
-		console.log("Type: ", typeof sayvoice_holdtime);
+		
+		// console.log("Type: ", typeof sayvoice_holdtime);
 
-		const sayvoice = document.getElementById('sayvoice');
-		if (sayvoice.value === "undefined") {
-			payload.sayvoice = "Samantha";
-		}
-		payload.sayvoice = sayvoice.value;
+		// const sayvoice = document.getElementById('sayvoice');
+		// if (sayvoice.value === "undefined") {
+		// 	payload.sayvoice = "Samantha";
+		// }
+		// payload.sayvoice = sayvoice.value;
+
+		// // console.log('sayVoice: ', typeof sayvoice.value);
+		// if(sayvoice.value) {
+		// 	console.log('sayVoice IS TRUE: ', sayvoice.value);
+		// }
+		// else {
+		// 	console.log('sayVoice IS FALSE: ', sayvoice.value, 'global: ', globalSayVoice);
+
+		// }
+		// if(globalSayVoice == false) {
+		// 	payload.sayvoice = "Samantha";
+		// }
+
+		console.log("1234: before", testGlobalVoice);
+		payload.sayvoice = testGlobalVoice;
+		console.log("1234 after: ", testGlobalVoice);
 
 		payload.isSayvoice = isSayvoice.toString();
 
@@ -282,7 +309,7 @@ function refreshListOfShortcuts() {
 		// console.log('🦑 ran the mainLoop', listOfShortcuts.value);
 
 	}
-	updateSettings();
+	// updateSettings();
 	//Check if folderList contains dropdown Shortuct
 	//If it does, then change the text & refresh the dropdown.
 	if (loadedPI === false) {
@@ -318,7 +345,7 @@ function refreshListOfShortcuts() {
 						select = document.getElementById("shortcuts_folder_list");
 						select.value = mappedDataFromBackend[key];
 						console.log("World!");
-					 }, 500);
+					 }, 100);
 
 
 				}
@@ -375,14 +402,20 @@ function refreshListOfVoices(sayvoice) {
 			select.appendChild(option);
 		}
 	}
-	if (sayvoice) {
-		select.value = sayvoice;
-		console.log("🔈 Defined SayVoice: ", sayvoice);
-	}
-	else {
-		select.value = globalSayVoice;
-		console.log("🔈 Undefined");
-	}
+
+	select.value = sayvoice;
+	// if (sayvoice) {
+	// 	select.value = sayvoice;
+	// 	globalSayVoice = sayvoice;
+	// 	console.log("🔈 Defined SayVoice: ", sayvoice);
+	// }
+	// else {
+	// 	// globalSayVoice = 'Samantha';
+	// 	select.value = globalSayVoice;
+	// 	console.log("🔈 Undefined");
+	// }
+
+	console.log("🧿 UUID 1245366987: ", select);
 }
 
 
@@ -424,8 +457,13 @@ function selectedNewIndex(selected_id, selected_type) {
 
 	}
 	else if (selected_id === -1) {
-		select1 = document.getElementById("sayvoice");
-		select1.value = "Siri";
+	}
+	else if (selected_type == "sayvoice") {
+		saySelect = document.getElementById("sayvoice");
+		console.log("XIOP", saySelect.value);
+		// saySelect.value = "Siri";
+		// saySelect.selectedIndex = 
+		testGlobalVoice = saySelect.value;
 		console.log("The voice is off!");
 	}
 	else {
@@ -700,4 +738,4 @@ const logSizeInKilobytes = (description, obj) => {
 	const bytes = getSizeInBytes(obj);
 	const kb = (bytes / 1000).toFixed(2);
 	console.log(`${description} is approximately ${kb} kB`);
-}; z
+};
