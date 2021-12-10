@@ -26,6 +26,8 @@ refType = "nil"
 
 listOfShortcutsAndFolders = {} //ToDefine?
 
+var shortcutFromBackend = "BackednAlert_Change";
+
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
 	uuid = inUUID;
 
@@ -66,7 +68,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			shortcut_list = document.getElementById('shortcut_list');
 
 			testGlobalVoice = payload.sayvoice;
-			
+
 			sayvoice = payload.sayvoice;
 			globalSayVoice = sayvoice;
 
@@ -163,7 +165,7 @@ function updateSettings() {
 		if (sayvoice_holdtime.value == "") {
 			payload.sayHoldTime = "0";
 		}
-		
+
 		// console.log("Type: ", typeof sayvoice_holdtime);
 
 		// const sayvoice = document.getElementById('sayvoice');
@@ -312,7 +314,58 @@ function refreshListOfShortcuts() {
 	// updateSettings();
 	//Check if folderList contains dropdown Shortuct
 	//If it does, then change the text & refresh the dropdown.
+	// testDebug = getElementById("shortcut_list");
+	
+	console.log("⚡ Out of check", listOfShortcuts);
+	console.log("⚡ Out of Single test", listOfShortcuts[0].value);
+	console.log("⚡ Selected Value ✅", listOfShortcuts.value);
+
+	loopedCut = "";
+
+	if (loadedPI === true) {
+
+		// if (listOfShortcuts.includes(shortcutFromBackend)) {
+		// 	listOfShortcuts.value = shortcutFromBackend;
+		// }
+		// else {
+			// listOfShortcuts.value = listOfCuts[0];
+		// }
+
+		// listOfShortcuts.value = shortcutFromBackend;
+
+		if (listOfCuts.includes(shortcutFromBackend)) {
+			listOfShortcuts.value = shortcutFromBackend;
+		}
+		else {
+			listOfShortcuts.value = listOfCuts[0];
+			shortcutFromBackend = listOfCuts[0];
+		}
+
+		// lookForShortcut: for (let value in listOfShortcuts) { 
+		// 	console.log("⚡ Out of Single test", listOfShortcuts[value].value);
+
+
+		// 	// setTimeout(() => {
+		// 		if (listOfShortcuts[value].value === shortcutFromBackend) {
+		// 			console.log("⚡ the array includes the cut: ", shortcutFromBackend);
+		// 			listOfShortcuts.value = shortcutFromBackend;
+		// 			break lookForShortcut;
+
+		// 		}
+		// 		else {
+		// 			console.log("⚡ the array DOES NOT INCLUDE the cut: ", shortcutFromBackend);
+		// 			console.log("⚡ in Else", listOfShortcuts);
+		// 			listOfShortcuts.value = listOfCuts[0];
+		// 			loopedCut = list
+		// 			// shortcutFromBackend = listOfCuts[0];
+		// 		}
+		// 	// }, 500);
+
+		// }
+	}
+	console.log("⚡ Selected Value After loop Check ✅", listOfShortcuts.value);
 	if (loadedPI === false) {
+		// console.log("🐻 1", testDebug.value);
 		console.log("   🦑 Mid Name: ", listOfShortcuts.value);
 		if (listOfCuts.includes(usersSelectedShortcut)) {
 
@@ -320,6 +373,7 @@ function refreshListOfShortcuts() {
 			//Set the dropdown's initial value to the user's saved Shortcut.
 			listOfShortcuts.value = usersSelectedShortcut;
 			console.log("   🦑 2/7 Name: ", listOfShortcuts.value);
+			// console.log("🐻 2", testDebug.value);
 
 			//filters through all keys, searching for the folder of said Shortcut.
 			for (const key of Object.keys(mappedDataFromBackend)) {
@@ -333,32 +387,43 @@ function refreshListOfShortcuts() {
 					//Set the folder's initial value to the folderName.
 					listOfFolders.value = mappedDataFromBackend[key];
 					console.log("   🦑 5/7 Name: ", listOfShortcuts.value, " | Folder: ", mappedDataFromBackend[key]);
+					// console.log("🐻 3", testDebug.value);
 
 					//Only run this code once, upon PI appearing.
 					console.log("   🦑 6/7 Name: ", listOfShortcuts.value);
 					loadedPI = true;
 					filterMapped(mappedDataFromBackend[key]); //Filter dropdown list based on the folder of the user's last set Shortcut
 					console.log("   🦑 8/7 Name: ", listOfShortcuts.value);
-					
+					// console.log("🐻 4", testDebug.value);
+
 					//This allows us to avoid the folder getting stuck on "All". Not the best workaround, but it works. 😅
-					setTimeout(() => { 
+					setTimeout(() => {
 						select = document.getElementById("shortcuts_folder_list");
+						// listOfShortcuts.value = 2;
 						select.value = mappedDataFromBackend[key];
+						listOfShortcuts.value = key;
+						shortcutFromBackend = key;
+						console.log("   🦑 ❌ 10: ", mappedDataFromBackend[key]);
+						console.log("   🦑 ❌ 11: ", key);
+						console.log("   🦑 ❌ 12: ", select);
 						console.log("World!");
-					 }, 100);
+					}, 100);
 
 
 				}
 			}
 		}
 	}
-	else {
-		listOfShortcuts.value = listOfCuts[0];
-	}
 	console.log("🚨refreshListOfShortcuts Stopping");
 }
 
 function refreshListOfShortcutsFolders() {
+
+	select = document.getElementById("shortcuts_folder_list");
+
+	// preShortcut = select.value;
+
+	console.log("PreSelect ", shortcutFromBackend);
 
 
 	if (shortcutsFolder.length > 1) {
@@ -370,7 +435,6 @@ function refreshListOfShortcutsFolders() {
 		console.log("We should only have 1 id, aka All: ", shortcutsFolder.length);
 	}
 
-	select = document.getElementById("shortcuts_folder_list");
 	//select.remove(select[0])
 
 	//  console.log('L of folders: ', listOfCuts.length)
@@ -451,6 +515,7 @@ function selectedNewIndex(selected_id, selected_type) {
 		// const shortcutName = document.getElementById('shortcutName');
 		// shortcutName.value = listOfCuts[selected_id];
 		//TODO: Send message about ref type 🟥
+		shortcutFromBackend = listOfCuts[selected_id];
 		console.log("		🟥  🚨  🟥  🚨   🟥  🚨  SIGNAL!?");
 		refType = "dropdownRefs";
 		// updateSettings();
