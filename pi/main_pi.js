@@ -315,24 +315,11 @@ function refreshListOfShortcuts() {
 	//Check if folderList contains dropdown Shortuct
 	//If it does, then change the text & refresh the dropdown.
 	// testDebug = getElementById("shortcut_list");
-	
-	console.log("⚡ Out of check", listOfShortcuts);
-	console.log("⚡ Out of Single test", listOfShortcuts[0].value);
-	console.log("⚡ Selected Value ✅", listOfShortcuts.value);
+
 
 	loopedCut = "";
 
 	if (loadedPI === true) {
-
-		// if (listOfShortcuts.includes(shortcutFromBackend)) {
-		// 	listOfShortcuts.value = shortcutFromBackend;
-		// }
-		// else {
-			// listOfShortcuts.value = listOfCuts[0];
-		// }
-
-		// listOfShortcuts.value = shortcutFromBackend;
-
 		if (listOfCuts.includes(shortcutFromBackend)) {
 			listOfShortcuts.value = shortcutFromBackend;
 		}
@@ -340,28 +327,6 @@ function refreshListOfShortcuts() {
 			listOfShortcuts.value = listOfCuts[0];
 			shortcutFromBackend = listOfCuts[0];
 		}
-
-		// lookForShortcut: for (let value in listOfShortcuts) { 
-		// 	console.log("⚡ Out of Single test", listOfShortcuts[value].value);
-
-
-		// 	// setTimeout(() => {
-		// 		if (listOfShortcuts[value].value === shortcutFromBackend) {
-		// 			console.log("⚡ the array includes the cut: ", shortcutFromBackend);
-		// 			listOfShortcuts.value = shortcutFromBackend;
-		// 			break lookForShortcut;
-
-		// 		}
-		// 		else {
-		// 			console.log("⚡ the array DOES NOT INCLUDE the cut: ", shortcutFromBackend);
-		// 			console.log("⚡ in Else", listOfShortcuts);
-		// 			listOfShortcuts.value = listOfCuts[0];
-		// 			loopedCut = list
-		// 			// shortcutFromBackend = listOfCuts[0];
-		// 		}
-		// 	// }, 500);
-
-		// }
 	}
 	console.log("⚡ Selected Value After loop Check ✅", listOfShortcuts.value);
 	if (loadedPI === false) {
