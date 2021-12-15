@@ -1,8 +1,8 @@
 {
   "Author": "SENTINELITE",
-  "Name": "StreamDeck Shortcuts",
+  "Name": "Shortcuts",
   "Description": "Launch Shortcuts straight from your StreamDeck! Features an accessibility mode for vision impaired users.",
-  "Category": "StreamDeck Shortcuts",
+  "Category": "Shortcuts",
   "Version": "1.0",
   "Icon": "Icons/ShortcutIcon",
   "CategoryIcon": "Icons/appIcon",
