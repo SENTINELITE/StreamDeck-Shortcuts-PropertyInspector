@@ -14,7 +14,7 @@ mappedDataFromBackend = { 'placeHolder': 'PlaceHolder2' };
 listOfVoices = ['PlaceholderVoice', 'test']
 
 isSayvoice = false;
-isForcedTitle = true;
+isForcedTitle = false;
 var globalSayVoice = "Alex";
 
 var testGlobalVoice = "Siri assistant";
@@ -27,6 +27,8 @@ refType = "nil"
 listOfShortcutsAndFolders = {} //ToDefine?
 
 var shortcutFromBackend = "BackednAlert_Change";
+
+var hasResent = false;
 
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
 	uuid = inUUID;
@@ -48,6 +50,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 		// Received message from Stream Deck
 		const jsonObj = JSON.parse(evt.data);
 		console.log("JSON DATA IMPORTANT READ!", jsonObj)
+		hasResent = true; //This is required due to the Swift Websocket not loading fast enough. This prevent's requesting the settings numerous times.
 		if (jsonObj.event === 'sendToPropertyInspector') {
 			console.log("Payload recieved, we've sent to the PI!!!!!");
 			const payload = jsonObj.payload;
@@ -103,6 +106,16 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 			const el = document.querySelector('.sdpi-wrapper');
 
+			// if (isForcedTitle === false) {
+			// 	setTimeout(() => {
+			// 		requestSettings('requestSettings');
+			// 		console.log('    🚨 ❄️ 🚨 ❄️ ALT X was False RE-requested=: ');
+			// 	}, 1000);
+			// }
+			// else {
+			// 	console.log('    🚨 ALT X true: ');
+			// }
+
 
 			filterMapped('All'); //Two way binding would be nice here...
 			refreshListOfShortcutsFolders();
@@ -143,8 +156,34 @@ function requestSettings(requestType, passIntoPayload) {
 		};
 		websocket.send(JSON.stringify(json));
 		console.log("👻 requestSettings", json);
+		// dealWithBug();
+		dealWithBug();
 	}
 }
+
+// function dealWithBug () {
+
+// 						setTimeout(() => {
+// 					requestSettings('requestSettings');
+// 					console.log('    🚨 ❄️ 🚨 ❄️ ALT X was False RE-requested=: ');
+// 				}, 1000);
+
+// }
+
+//Helper delay
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+
+//This function waits a second & if we haven't recieved the payload, then we re-request after a second
+const dealWithBug = async () => {
+	await delay(500);
+
+	if(hasResent === false) {
+		requestSettings('requestSettings');
+		console.log("Swift WebSocket is still loading. We've re-requested the settings.");
+	}
+	console.log("Swift WebSocket is still loading. We've done another check...");
+  };
 
 function updateSettings() {
 	if (websocket) {
