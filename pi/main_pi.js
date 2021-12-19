@@ -12,7 +12,6 @@ const object1 = {"VideoTakeout": "All", "TestCut_Name": "StreamDeck", "Restart_S
 // console.log('');
 // console.log('');
 
-
 let websocket = null,
 	uuid = null,
 	actionInfo = {};
