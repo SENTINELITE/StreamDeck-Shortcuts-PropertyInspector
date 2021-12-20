@@ -1,16 +1,6 @@
 
 //Someone with more knowledge of JS would be able to make this better. 😉
 //Shoutout to GitHub CoPilot for the assitance!
-const object1 = {"VideoTakeout": "All", "TestCut_Name": "StreamDeck", "Restart_StreamDeck": "All", "TestAlertDebug": "StreamDeck Shortcuts", "Make Stream Deck icons": "All", "Move Window": "All", "Make Stream Deck folder icon": "All", "JS Common Sort": "All", "iCloud Shortcut Inspector": "All", "DebugSD": "All", "Open Craft Recording Notes": "All", "Directions Home": "All", "Set Elgato Light With Put": "All", "Prepare Web Assets": "All", "Open URLs": "All", "ToggleNanoleafBulb": "StreamDeck Shortcuts", "StreamDeck SpeedTest": "All", "Resize Image to 256px": "All", "Compress Image by 50%": "All", "TestCut_New1": "StreamDeck", "New Shortcut 3": "All", "Open Twitch SE": "All", "New Shortcut 2": "All", "TestCut_New": "StreamDeck", "TestAlert": "StreamDeck", "New Shortcut 1": "All", "Open Space": "All", "Test Alert": "StreamDeck", "Test With Spaces": "All", "Save Text Files": "All", "ElgatoTest": "All", "Open Apple": "All", "iCloud Shortcut Inspector 1": "All", "TestsDelete": "TestDelete", "New Shortcut": "All", "Create Shortcut in Shortcuts": "All", "Open Apps Bundle": "StreamDeck Shortcuts"}
-
-// for (const [key, value] of Object.entries(object1)) {
-//   console.log('🚀 ❄️', `${key}: ${value}`);
-// };
-
-// console.log('🚀 ❄️ OBject 1', object1);
-// console.log('');
-// console.log('');
-// console.log('');
 
 let websocket = null,
 	uuid = null,
@@ -36,6 +26,7 @@ refType = "nil"
 listOfShortcutsAndFolders = {} //ToDefine?
 
 var shortcutFromBackend = "BackednAlert_Change";
+
 
 var hasResent = false;
 
@@ -68,6 +59,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 				return;
 			}
 
+			// const errorText2 = document.getElementById('errorPatch');
+			// errorText2.value = "Looking for error...";
+			debugText(`Looking for error...`, true);
+
 			console.log("Payload: ", payload);
 
 			logSizeInBytes('payload recvd', payload);
@@ -83,6 +78,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 			sayvoice = payload.sayvoice;
 			globalSayVoice = sayvoice;
+
+			
 
 			// console.log('sayVoice Start: ', typeof sayvoice);
 			console.log('sayVoice Start: ', sayvoice); //Name of Voice
@@ -215,6 +212,20 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			console.log("Pre ForcedTitle: ", isForcedTitle);
 			isForcedTitle = JSON.parse(payload.isForcedTitle);
 			console.log("ForcedTitle: ", isForcedTitle);
+
+			isInitPayload = JSON.parse(payload.isInitPayload);
+			console.log("isInitPayload: ", isInitPayload);
+
+			if (isInitPayload === true) {
+				// debugText("Loading the rest of your Library...", true)
+				// errorText2.value = "Loading Library...";
+				debugText("Loading the rest of your Library...", true)
+			}
+			else {
+				// debugText("", false)
+				// errorText2.value = "Done Loading...";
+				debugText("Done Loading...", false)
+			}
 
 			const sayvoice_holdtime = document.getElementById('sayvoice_holdtime');
 			sayvoice_holdtime.value = payload.sayHoldTime; //Need to check if this is a valid number & set min/max
@@ -585,19 +596,26 @@ function refreshListOfShortcuts() {
 		}
 	}
 	console.log("🚨refreshListOfShortcuts Stopping");
-	if (listOfShortcuts.length === 0) {
-		// debugTextToPass = "⚠️ Error Code: 'Section-Six' \ This folder is empty!";
-		// debugText(debugTextToPass, true)
-	}
-	else {
-		debugText("", false);
-	}
+	// if (listOfShortcuts.length === 0) {
+	// 	// debugTextToPass = "⚠️ Error Code: 'Section-Six' \ This folder is empty!";
+	// 	// debugText(debugTextToPass, true)
+	// }
+	// else {
+	// 	// debugText("", false);
+	// }
 }
 
 function debugText(errorText, showDebug) {
 	const textArea2 = document.getElementById('mytextarea');
 	const debugTextParent = document.getElementById('message_only');
 	const PI_Shortcuts = document.getElementById('PI_Shortcuts');//Shortcut nameofElement
+	// const errorTextDebug = document.getElementById('errorPatch');
+	// const errorTextNew = document.getElementById('errorPatch');
+
+	// errorTextDebug.value = errorText;
+
+	// errorTextNew.value = errorText;
+	// showDebug = false
 
 	if (showDebug === true) {
 		PI_Shortcuts.style.display = "none";
