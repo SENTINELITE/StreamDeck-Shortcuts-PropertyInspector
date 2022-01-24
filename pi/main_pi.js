@@ -1,6 +1,12 @@
 
 //Someone with more knowledge of JS would be able to make this better. 😉
-//Shoutout to GitHub CoPilot for the assitance!
+//Shoutout to GitHub CoPilot for the assistance!
+
+var RELEASE = '1.0.2';
+Sentry.init({
+	dsn: "https://e5b7ab3d23b04542818cc7bbd4a9dc0a@o1114114.ingest.sentry.io/6145162",
+	release: RELEASE,
+});
 
 let websocket = null,
 	uuid = null,
@@ -46,7 +52,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 		requestSettings('requestSettings');
 	};
 
-	websocket.onmessage = function (evt) { //From Backedn to PI!
+	websocket.onmessage = function (evt) { //From Backend to PI!
 		// Received message from Stream Deck
 		const jsonObj = JSON.parse(evt.data);
 		console.log("JSON DATA IMPORTANT READ!", jsonObj)
@@ -55,6 +61,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			console.log("Payload recieved, we've sent to the PI!!!!!");
 			const payload = jsonObj.payload;
 			if (payload.error) {
+				Sentry.captureException(payload.error);
 				// printToConsole('Error: ' + payload.error);
 				return;
 			}
@@ -276,6 +283,7 @@ function parseJSONSafely(str) {
 	   return JSON.parse(str);
 	}
 	catch (error) {
+		Sentry.captureException(error);
 	   console.log('This is the error: ', error);
 		debugTextToPass = `⚠️ Error Code: 'Section-Six' \ JSON Failure! \nJSON: ${error}`, error;
 		debugText(debugTextToPass, true)
@@ -524,7 +532,7 @@ function refreshListOfShortcuts() {
 
 	}
 	// updateSettings();
-	//Check if folderList contains dropdown Shortuct
+	//Check if folderList contains dropdown Shortcut
 	//If it does, then change the text & refresh the dropdown.
 	// testDebug = getElementById("shortcut_list");
 
@@ -618,6 +626,11 @@ function debugText(errorText, showDebug) {
 	// showDebug = false
 
 	if (showDebug === true) {
+		// if errorText == 'Looking for error...' {
+			
+		// } else {
+		Sentry.captureException(errorText);	
+		// }
 		PI_Shortcuts.style.display = "none";
 		textArea2.style.display = "block";
 		textArea2.value = errorText;
@@ -921,6 +934,7 @@ function fillCustomList() {
 		try {
 			list.appendChild(option);
 		} catch (e) {
+			Sentry.captureException(e);
 			//WARING: This is suppressing the errors, I believe. For whatever reason, this. is allowing the list to be filled...
 			// list.appendChild(option);
 		}
