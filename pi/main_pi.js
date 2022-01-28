@@ -2,7 +2,7 @@
 //Someone with more knowledge of JS would be able to make this better. 😉
 //Shoutout to GitHub CoPilot for the assistance!
 
-var RELEASE = '1.0.3';
+var RELEASE = '1.0.4';
 Sentry.init({
 	dsn: "https://e5b7ab3d23b04542818cc7bbd4a9dc0a@o1114114.ingest.sentry.io/6145162",
 	release: RELEASE,
