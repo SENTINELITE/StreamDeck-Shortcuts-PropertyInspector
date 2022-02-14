@@ -1,7 +1,12 @@
 
 //Someone with more knowledge of JS would be able to make this better. 😉
-//Shoutout to GitHub CoPilot for the assitance!
+//Shoutout to GitHub CoPilot for the assistance!
 
+var RELEASE = '1.0.5';
+Sentry.init({
+	dsn: "https://e5b7ab3d23b04542818cc7bbd4a9dc0a@o1114114.ingest.sentry.io/6145162",
+	release: RELEASE,
+});
 
 let websocket = null,
 	uuid = null,
@@ -14,7 +19,7 @@ mappedDataFromBackend = { 'placeHolder': 'PlaceHolder2' };
 listOfVoices = ['PlaceholderVoice', 'test']
 
 isSayvoice = false;
-isForcedTitle = true;
+isForcedTitle = false;
 var globalSayVoice = "Alex";
 
 var testGlobalVoice = "Siri assistant";
@@ -27,6 +32,9 @@ refType = "nil"
 listOfShortcutsAndFolders = {} //ToDefine?
 
 var shortcutFromBackend = "BackednAlert_Change";
+
+
+var hasResent = false;
 
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
 	uuid = inUUID;
@@ -44,17 +52,23 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 		requestSettings('requestSettings');
 	};
 
-	websocket.onmessage = function (evt) { //From Backedn to PI!
+	websocket.onmessage = function (evt) { //From Backend to PI!
 		// Received message from Stream Deck
 		const jsonObj = JSON.parse(evt.data);
 		console.log("JSON DATA IMPORTANT READ!", jsonObj)
+		hasResent = true; //This is required due to the Swift Websocket not loading fast enough. This prevent's requesting the settings numerous times.
 		if (jsonObj.event === 'sendToPropertyInspector') {
 			console.log("Payload recieved, we've sent to the PI!!!!!");
 			const payload = jsonObj.payload;
 			if (payload.error) {
+				Sentry.captureException(payload.error);
 				// printToConsole('Error: ' + payload.error);
 				return;
 			}
+
+			// const errorText2 = document.getElementById('errorPatch');
+			// errorText2.value = "Looking for error...";
+			debugText(`Looking for error...`, true);
 
 			console.log("Payload: ", payload);
 
@@ -72,6 +86,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			sayvoice = payload.sayvoice;
 			globalSayVoice = sayvoice;
 
+			
+
 			// console.log('sayVoice Start: ', typeof sayvoice);
 			console.log('sayVoice Start: ', sayvoice); //Name of Voice
 
@@ -79,12 +95,118 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			// listOfCuts = JSON.parse(listOfCuts);
 
 			shortcutsFolder = payload.shortcutsFolder;
+			console.log("about to parse json!", shortcutsFolder);
 			shortcutsFolder = JSON.parse(shortcutsFolder);
+			console.log("Parsed")
 			//ShortcutsFolder
 
+			var _1 = {"VideoTakeout": "All", "TestCut_Name": "StreamDeck", "Restart_StreamDeck": "All", "TestAlertDebug": "StreamDeck Shortcuts", "Make Stream Deck icons": "All", "Move Window": "All", "Make Stream Deck folder icon": "All", "JS Common Sort": "All", "iCloud Shortcut Inspector": "All", "DebugSD": "All", "Open Craft Recording Notes": "All", "Directions Home": "All", "Set Elgato Light With Put": "All", "Prepare Web Assets": "All", "Open URLs": "All", "ToggleNanoleafBulb": "StreamDeck Shortcuts", "StreamDeck SpeedTest": "All", "Resize Image to 256px": "All", "Compress Image by 50%": "All", "TestCut_New1": "StreamDeck", "New Shortcut 3": "All", "Open Twitch SE": "All", "New Shortcut 2": "All", "TestCut_New": "StreamDeck", "TestAlert": "StreamDeck", "New Shortcut 1": "All", "Open Space": "All", "Test Alert": "StreamDeck", "Test With Spaces": "All", "Save Text Files": "All", "ElgatoTest": "All", "Open Apple": "All", "iCloud Shortcut Inspector 1": "All", "Test\'sDelete": "TestDelete", "New Shortcut": "All", "Create Shortcut in Shortcuts": "All", "Open Apps Bundle": "StreamDeck Shortcuts"};
+
 			mappedDataFromBackend = payload.mappedDataFromBackend;
-			mappedDataFromBackend = mappedDataFromBackend.replace('[', '{').replace(']', '}');
-			mappedDataFromBackend = JSON.parse(mappedDataFromBackend);
+			mappedDataFromBackend = parseJSONSafely(mappedDataFromBackend);
+			// mappedDataFromBackend = JSON.parse(mappedDataFromBackend);
+			console.log("🚀 ❄️ mappedDataFromBackend: About To Read", mappedDataFromBackend);
+			console.log("🚀 ❄️ About To Read", mappedDataFromBackend.length, typeof mappedDataFromBackend);
+// 			console.log("🚀 ❄️ About to: READ", mappedDataFromBackend);
+// 			var outNewTest = payload.mappedDataFromBackend.replace('[', '{').replace(']', '}'); //replace('[', '{').replace(']', '}');;
+// 			console.log("🚀 ❄️ About to: READ", outNewTest);
+// 			// outNewTest = outNewTest.replace(/\\/, "")
+// 			// outNewTest = outNewTest.replace("'s", "\u0027")
+// 			// outNewTest = JSON.parse(outNewTest);
+// 			outNewTest = outNewTest.replace(/\'/g, "")
+// 			// outNewTest = outNewTest.replace(//g, "")
+// 			console.log("🚀 ❄️ outNewTest: ", outNewTest);
+
+
+// 			// outNewTest = outNewTest.replace("'", "E001")
+// 			outNewTest = outNewTest.replace(/'/g, "")
+
+// 			//This line below will crash! We need to do a try catch, & print the error out if caught!
+// 			outNewTest = parseJSONSafely(outNewTest);
+// 			// outNewTest = JSON.parse(outNewTest);
+// 			console.log("🚀 ❄️ outNewTest: ", outNewTest);
+// 			// outNewTest = outNewTest.replace(/\\/, "\\\\")
+// 			var index = 0;
+
+// 			//Key = shortcut Name
+// 			//Value = folder Name
+// 			// outNewTest.replace("/\\/g", "_001Wevefoundit");
+// 			for (const [key, value] of Object.entries(outNewTest)) {
+// 				console.log('🚀 ❄️', `${key}: ${value}`);
+// 				if (`${key.includes("'s'")}`) {
+// 					console.log('🚀 ❄️ This is a web shortcut');
+// 					var x =  `${key}`
+// 					// delete outNewTest[x]; 
+// 					x = x.replace("\\", "_TestIsHere")
+// 					console.log('🚀 ❄️ 🚨 XL ', x);
+// 				}
+// 			  };
+			  
+
+// 			for (var key in outNewTest) {
+// 				console.log("🚀 ❄️ outNewTest: key & index ", key, index);
+// 				index ++;
+
+// 				// if (key === "Test'sDelete") {
+// 				// 	console.log("🚀 ❄️ outNewTest: key index ", outNewTest.indexOf(key))
+// 				// }
+// 			}
+// 			console.log("🚀 ❄️ outNewTest: key index ", outNewTest[33])
+// 			// outNewTest = outNewTest.replace("\'", "INSERTTHIS");
+// 			// var parsedJson = JSON.parse(outNewTest, function (key, value) {
+// 			// 	console.log("🚀 ❄️ key: ", key);
+// 			// 	if(key === "All")
+// 			// 		return "C";
+			
+// 			// 	if(key === 4)
+// 			// 		return "D";
+			
+// 			// 	return value; 
+// 			// });
+
+// 			// console.log("🚀 ❄️ parsedJson: ", parsedJson);
+// 			console.log("🚀 ❄️ parsedJson: Aboce");
+
+
+
+
+
+// 			console.log("about to parse json MappedData!", mappedDataFromBackend);
+// 			mappedDataFromBackend = mappedDataFromBackend.replace('[', '').replace(']', ''); //replace('[', '{').replace(']', '}');
+// 			console.log("🚀 ❄️ about to parse json MappedData!", mappedDataFromBackend);
+// 			console.log(typeof mappedDataFromBackend);
+
+// 			var _data = {mappedDataFromBackend};
+// 			// _data = _data.split(',');
+// 			// _data = _data.slice(1,-1);
+// 			console.log("🚀 ❄️ about to parse json _data!", _data);
+// 			console.log("🚀 ❄️ about to parse json _data0!", _data.VideoTakeout);
+
+// 			var objTest = {"name":"Jo\'hn", "age":"30\'", "city":"New York"};
+// 			console.log(typeof objTest);
+
+// 			var newMappedData = mappedDataFromBackend.split(',');
+// 			console.log("🚀 ❄️ NewMappedData: ", newMappedData);
+// 			console.log(newMappedData);
+// 			console.log(typeof newMappedData);
+// 			// let newMappedDataDic = newMappedData[0].slice(1,-1);
+// 			console.log("🚀 ❄️ Test", newMappedData[0]);
+// 			mappedDataFromBackend = newMappedData;
+// 			console.log("🚀 ❄️ MappedData: ", mappedDataFromBackend);
+// 			// console.log("TestTrimmed", newMappedDataDic);
+
+// 			// mappedDataFromBackend = JSON.parse(mappedDataFromBackend);
+// 			// regex uses look-forwards and look-behinds to select only single-quotes that should be selected
+// // const regex = /('(?=(,\s*')))|('(?=:))|((?<=([:,]\s*))')|((?<={)')|('(?=}))/g;
+// // str = mappedDataFromBackend.replace(regex, '"');
+// // console.log("about to parse json MappedData!", str);
+// // str = JSON.parse(str);
+// // console.log(typeof str);
+// // console.log(str);
+// 			// var textTest = JSON.parse(mappedDataFromBackend);
+// 			// console.log(typeof textTest);
+// 			// console.log(textTest);
+// 			console.log("Parsed")
 
 
 			listOfVoices = JSON.parse(payload.voices);
@@ -98,11 +220,36 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			isForcedTitle = JSON.parse(payload.isForcedTitle);
 			console.log("ForcedTitle: ", isForcedTitle);
 
+			isInitPayload = JSON.parse(payload.isInitPayload);
+			console.log("isInitPayload: ", isInitPayload);
+
+			if (isInitPayload === true) {
+				// debugText("Loading the rest of your Library...", true)
+				// errorText2.value = "Loading Library...";
+				debugText("Loading the rest of your Library...", true)
+			}
+			else {
+				// debugText("", false)
+				// errorText2.value = "Done Loading...";
+				debugText("Done Loading...", false)
+			}
+
 			const sayvoice_holdtime = document.getElementById('sayvoice_holdtime');
 			sayvoice_holdtime.value = payload.sayHoldTime; //Need to check if this is a valid number & set min/max
 
 			const el = document.querySelector('.sdpi-wrapper');
 
+			// if (isForcedTitle === false) {
+			// 	setTimeout(() => {
+			// 		requestSettings('requestSettings');
+			// 		console.log('    🚨 ❄️ 🚨 ❄️ ALT X was False RE-requested=: ');
+			// 	}, 1000);
+			// }
+			// else {
+			// 	console.log('    🚨 ALT X true: ');
+			// }
+
+			// mappedDataFromBackend = outNewTest;
 
 			filterMapped('All'); //Two way binding would be nice here...
 			refreshListOfShortcutsFolders();
@@ -131,6 +278,20 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 }
 
+function parseJSONSafely(str) {
+	try {
+	   return JSON.parse(str);
+	}
+	catch (error) {
+		Sentry.captureException(error);
+	   console.log('This is the error: ', error);
+		debugTextToPass = `⚠️ Error Code: 'Section-Six' \ JSON Failure! \nJSON: ${error}`, error;
+		debugText(debugTextToPass, true)
+	   // Return a default object, or null based on use case.
+	   return {}
+	}
+ }
+
 function requestSettings(requestType, passIntoPayload) {
 	if (websocket) {
 		let payload = {}; //Append to payload with our passIntoPayload value
@@ -143,8 +304,51 @@ function requestSettings(requestType, passIntoPayload) {
 		};
 		websocket.send(JSON.stringify(json));
 		console.log("👻 requestSettings", json);
+		// dealWithBug();
+		dealWithBug();
 	}
 }
+
+// function dealWithBug () {
+
+// 						setTimeout(() => {
+// 					requestSettings('requestSettings');
+// 					console.log('    🚨 ❄️ 🚨 ❄️ ALT X was False RE-requested=: ');
+// 				}, 1000);
+
+// }
+
+//Helper delay
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+var resentCount = 0;
+
+//This function waits a second & if we haven't recieved the payload, then we re-request after a second
+const dealWithBug = async () => {
+	await delay(500);
+
+	if (resentCount < 10) {
+		resentCount ++;
+		if(hasResent === false) {
+			requestSettings('requestSettings');
+			console.log("Swift WebSocket is still loading. We've re-requested the settings.");
+		}
+	}
+	else {
+		// const textArea = document.getElementById('mytextarea');//Shortcut nameofElement
+		const PI_Shortcuts = document.getElementById('PI_Shortcuts');//Shortcut nameofElement
+		// textArea.value = "⚠️ Error Code: 'Kilo-One' \ Please restart the StreamDeck Software.";
+		console.log('10 requests have been sent. WebSocket is not responding. We will not be re-requesting.');
+		PI_Shortcuts.style.display = "none";
+
+		valToPass = "⚠️ Error Code: 'Kilo-One' \ Please restart the StreamDeck Software.";
+		debugText(valToPass, true);
+		//Change the status of something to X
+	}
+  };
+
+  ///WERAWERAWEA REMOVE
+//   dealWithBug();
 
 function updateSettings() {
 	if (websocket) {
@@ -257,15 +461,24 @@ function findFolder(shortcut) {
 //We filter all of the shortcuts, based off of the selected folder input.
 function filterMapped(filteredByFolder) {
 	console.log("🚨filterMapped Starting, with folder", filteredByFolder);
+	console.log(mappedDataFromBackend)
 
 	listOfCuts.length = 0; //Reset the listOfCuts everytime we refilter.
 
 	var sh_count = 0;
 
 	if (filteredByFolder == 'All') {
+	console.log('This is the result! ', mappedDataFromBackend[0])
+
+		// for (const [key, value] of Object.entries(mappedDataFromBackend)) {
+		// 	console.log("00001")
+		// 	console.log(`${key}: ${value}`);
+		//   }
+
 		for (var key in mappedDataFromBackend) {
 			sh_count++;
-			console.log("🚨filterMapped: All,  | Ket: ", key.key, " | Value: ", key.value);
+			// console.log("🚨filterMapped: All,  | Ket: ", key.key, " | Value: ", key.value);
+			// console.log("🚨filterMapped: All,  | Ket: ", key, " | Value: ", mappedDataFromBackend[key]);
 			listOfCuts.push(key);
 		}
 		console.log("🚨filterMapped: All, Total sh_count: ", sh_count);
@@ -273,10 +486,16 @@ function filterMapped(filteredByFolder) {
 	}
 	else {
 		for (var key in mappedDataFromBackend) {
-			console.log(key + " <:> " + mappedDataFromBackend[key]);
+			// console.log(key + " <:> " + mappedDataFromBackend[key]);
 			if (filteredByFolder == mappedDataFromBackend[key]) {
+				sh_count++;
 				listOfCuts.push(key);
 			}
+		}
+		console.log("🚨filterMapped:  LOC", listOfCuts.length);
+		if (sh_count === 0) {
+			console.log("🚨filterMapped: No shortcuts in this folder ____eiuhauiehfiuaeuwui!", sh_count);
+			//
 		}
 	}
 
@@ -290,13 +509,14 @@ function filterMapped(filteredByFolder) {
 
 function refreshListOfShortcuts() {
 	console.log("🚨refreshListOfShortcuts Starting");
+	console.log("✈️❄️ Shortcuts array: ", listOfCuts);
 	// select = document.getElementById("shortcut_list");
 	listOfShortcuts = document.getElementById("shortcut_list");
 	listOfFolders = document.getElementById("shortcuts_folder_list");
 
 	console.log("   🦑 Before Name: ", listOfShortcuts.value);
+	listOfShortcuts.length = 0;
 	if (listOfShortcuts.length != listOfCuts.length) {
-		listOfShortcuts.length = 0;
 
 		for (var val of listOfCuts) {
 			option = genOption(val);
@@ -312,7 +532,7 @@ function refreshListOfShortcuts() {
 
 	}
 	// updateSettings();
-	//Check if folderList contains dropdown Shortuct
+	//Check if folderList contains dropdown Shortcut
 	//If it does, then change the text & refresh the dropdown.
 	// testDebug = getElementById("shortcut_list");
 
@@ -322,10 +542,14 @@ function refreshListOfShortcuts() {
 	if (loadedPI === true) {
 		if (listOfCuts.includes(shortcutFromBackend)) {
 			listOfShortcuts.value = shortcutFromBackend;
+			console.log("☀️ SUN 0 if | 🦑 shortcutFromBackend: ", shortcutFromBackend, "listOFCuts Selected: ", listOfShortcuts.value);
+			console.log("☀️ SUN 0 if | 🦑 LOC: ", listOfCuts);
 		}
 		else {
-			listOfShortcuts.value = listOfCuts[0];
 			shortcutFromBackend = listOfCuts[0];
+			listOfShortcuts.value = shortcutFromBackend;
+			console.log("☀️ SUN 1 else | 🦑 shortcutFromBackend: ", shortcutFromBackend, "listOFCuts Selected: ", listOfShortcuts.value, "ListOFShortcuts", listOfShortcuts);
+			console.log("☀️ SUN 1 else | 🦑 LOC: ", listOfCuts);
 		}
 	}
 	console.log("⚡ Selected Value After loop Check ✅", listOfShortcuts.value);
@@ -380,9 +604,49 @@ function refreshListOfShortcuts() {
 		}
 	}
 	console.log("🚨refreshListOfShortcuts Stopping");
+	// if (listOfShortcuts.length === 0) {
+	// 	// debugTextToPass = "⚠️ Error Code: 'Section-Six' \ This folder is empty!";
+	// 	// debugText(debugTextToPass, true)
+	// }
+	// else {
+	// 	// debugText("", false);
+	// }
+}
+
+function debugText(errorText, showDebug) {
+	const textArea2 = document.getElementById('mytextarea');
+	const debugTextParent = document.getElementById('message_only');
+	const PI_Shortcuts = document.getElementById('PI_Shortcuts');//Shortcut nameofElement
+	// const errorTextDebug = document.getElementById('errorPatch');
+	// const errorTextNew = document.getElementById('errorPatch');
+
+	// errorTextDebug.value = errorText;
+
+	// errorTextNew.value = errorText;
+	// showDebug = false
+
+	if (showDebug === true) {
+		// if errorText == 'Looking for error...' {
+		// } else {
+		Sentry.captureException(errorText);	
+		// }
+		PI_Shortcuts.style.display = "none";
+		textArea2.style.display = "block";
+		textArea2.value = errorText;
+	}
+	else {
+		PI_Shortcuts.style.display = "block";
+		textArea2.value = "";
+		debugTextParent.style.display = "none";
+	}
+
+	console.log("🚨debugText", errorText);
+	console.log("show", showDebug);
+	console.log("🚨textArea2", textArea2);
 }
 
 function refreshListOfShortcutsFolders() {
+	// debugText("", false);
 
 	select = document.getElementById("shortcuts_folder_list");
 
@@ -669,6 +933,7 @@ function fillCustomList() {
 		try {
 			list.appendChild(option);
 		} catch (e) {
+			Sentry.captureException(e);
 			//WARING: This is suppressing the errors, I believe. For whatever reason, this. is allowing the list to be filled...
 			// list.appendChild(option);
 		}
