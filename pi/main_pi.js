@@ -2,7 +2,7 @@
 //Someone with more knowledge of JS would be able to make this better. 😉
 //Shoutout to GitHub CoPilot for the assistance!
 
-var RELEASE = '1.0.5';
+var RELEASE = '1.0.6';
 Sentry.init({
 	dsn: "https://e5b7ab3d23b04542818cc7bbd4a9dc0a@o1114114.ingest.sentry.io/6145162",
 	release: RELEASE,
@@ -39,7 +39,7 @@ var hasResent = false;
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
 	uuid = inUUID;
 
-	actionInfo = JSON.parse(inActionInfo);
+	actionInfo = JSON5.parse(inActionInfo);
 	websocket = new WebSocket('ws://localhost:' + inPort);
 
 	websocket.onopen = function () {
@@ -54,7 +54,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 	websocket.onmessage = function (evt) { //From Backend to PI!
 		// Received message from Stream Deck
-		const jsonObj = JSON.parse(evt.data);
+		const jsonObj = JSON5.parse(evt.data);
 		console.log("JSON DATA IMPORTANT READ!", jsonObj)
 		hasResent = true; //This is required due to the Swift Websocket not loading fast enough. This prevent's requesting the settings numerous times.
 		if (jsonObj.event === 'sendToPropertyInspector') {
@@ -94,10 +94,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 			// listOfCuts = payload.shortcuts; //Get Array From SWift, Update ListOfCuts, then make the Dropdown list 
 			// listOfCuts = JSON.parse(listOfCuts);
 
+//TODO: Merge this into one line
 			shortcutsFolder = payload.shortcutsFolder;
 			console.log("about to parse json!", shortcutsFolder);
-			shortcutsFolder = JSON.parse(shortcutsFolder);
-			console.log("Parsed")
+			shortcutsFolder = parseJSONSafely(shortcutsFolder); //We get a parse error here. We need to safely check the data		| 	Changed JSON.parse -> parseJSONSafely
+			console.log("parsed json!", shortcutsFolder);
 			//ShortcutsFolder
 
 			var _1 = {"VideoTakeout": "All", "TestCut_Name": "StreamDeck", "Restart_StreamDeck": "All", "TestAlertDebug": "StreamDeck Shortcuts", "Make Stream Deck icons": "All", "Move Window": "All", "Make Stream Deck folder icon": "All", "JS Common Sort": "All", "iCloud Shortcut Inspector": "All", "DebugSD": "All", "Open Craft Recording Notes": "All", "Directions Home": "All", "Set Elgato Light With Put": "All", "Prepare Web Assets": "All", "Open URLs": "All", "ToggleNanoleafBulb": "StreamDeck Shortcuts", "StreamDeck SpeedTest": "All", "Resize Image to 256px": "All", "Compress Image by 50%": "All", "TestCut_New1": "StreamDeck", "New Shortcut 3": "All", "Open Twitch SE": "All", "New Shortcut 2": "All", "TestCut_New": "StreamDeck", "TestAlert": "StreamDeck", "New Shortcut 1": "All", "Open Space": "All", "Test Alert": "StreamDeck", "Test With Spaces": "All", "Save Text Files": "All", "ElgatoTest": "All", "Open Apple": "All", "iCloud Shortcut Inspector 1": "All", "Test\'sDelete": "TestDelete", "New Shortcut": "All", "Create Shortcut in Shortcuts": "All", "Open Apps Bundle": "StreamDeck Shortcuts"};
@@ -208,19 +209,19 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 // 			// console.log(textTest);
 // 			console.log("Parsed")
 
-
-			listOfVoices = JSON.parse(payload.voices);
+//TODO: Use the safeJson, to catch errors...
+			listOfVoices = JSON5.parse(payload.voices);
 
 			console.log("isSayvoice Pre: ", isSayvoice);
-			isSayvoice = JSON.parse(payload.isSayvoice);
+			isSayvoice = JSON5.parse(payload.isSayvoice);
 			console.log("isSayvoice: ", isSayvoice);
 			console.log('SayVoice: ', typeof isSayvoice);
 
 			console.log("Pre ForcedTitle: ", isForcedTitle);
-			isForcedTitle = JSON.parse(payload.isForcedTitle);
+			isForcedTitle = JSON5.parse(payload.isForcedTitle);
 			console.log("ForcedTitle: ", isForcedTitle);
 
-			isInitPayload = JSON.parse(payload.isInitPayload);
+			isInitPayload = JSON5.parse(payload.isInitPayload);
 			console.log("isInitPayload: ", isInitPayload);
 
 			if (isInitPayload === true) {
@@ -280,7 +281,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
 function parseJSONSafely(str) {
 	try {
-	   return JSON.parse(str);
+	   return JSON5.parse(str);
 	}
 	catch (error) {
 		Sentry.captureException(error);
