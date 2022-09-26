@@ -23,7 +23,7 @@
       "Icon": "Icons/appIcon",
       "Name": "Launch Shortcut",
       "UUID": "shortcut.run",
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "Launches Shortcut!",
       "States": [
         {
